@@ -20,29 +20,11 @@ public class RadioCharts {
 
     }
     public String getMostPlayedSong(){
-        String SQL = "SELECT * FROM music_broadcast";
+        String SQL = "SELECT TOP 1 song, SUM(times_aired) FROM music_broadcast GROUP BY song ORDER by SUM(times_aired) DESC";
         try {
             ResultSet rs = connection.createStatement().executeQuery(SQL);
-            Map<Song,Integer> songs = new HashMap<>();
-            if (!rs.next()) {
-                return "";
-            }
-            else {
-                do {
-                    Song song = new Song(rs.getString(2), rs.getInt(3));
-                    int count = songs.getOrDefault(song, 0);
-                    songs.put(song, count + song.getTimesAired());
-                } while (rs.next());
-            }
-            Map.Entry<Song,Integer> mostPlayed = null;
-            for (Map.Entry<Song,Integer> song : songs.entrySet())
-            {
-                if (mostPlayed == null || song.getValue().compareTo(mostPlayed.getValue()) > 0)
-                {
-                    mostPlayed = song;
-                }
-            }
-            return mostPlayed.getKey().getTitle();
+            rs.next();
+            return rs.getString(1);
         } catch (SQLException e) {
             return "";
         }
